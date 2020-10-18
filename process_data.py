@@ -1,12 +1,6 @@
-# %load_ext autoreload
-# %autoreload 2
 '''
 Package Import
 '''
-# ML libraries 
-# from sklearn.cluster import KMeans
-# from sklearn.neighbors.kde import KernelDensity
-
 # Computation & Signal Processing
 from scipy import signal
 import numpy as np
@@ -14,28 +8,12 @@ import pandas as pd
 import pylab as pl
 import pickle
 import scipy.io as spio
-
 #biosppy package for ecg signal analysis
 from biosppy import storage
 from biosppy.signals import ecg
-
-
-
-# Plotting
-# import matplotlib.pyplot as plt
-# import plotly
-# import plotly.graph_objs as go
-# import plotly.io as pio
-# plotly.offline.init_notebook_mode(connected=True)
-# %matplotlib widget
-
 from utils import * #import data import, clean up and sampling functions. 
-# import time
 import time 
-
 from ECG_feature_extractor_1000 import *
-
-
 
 class Processor:
     '''
@@ -60,19 +38,10 @@ class Processor:
     def __init__(self, participant, trial):
         ## Existed string definition in Abdul file
         self.data_dir_treadmill = 'Treadmill data_trial1-4'
-        # self.file3_clientinfo = 'OA_302_P1_CLIENTINFO'
-        # self.file3_cueing = 'OA_302_N1_CUEING'
-        # self.file3_gaitcycles = 'OA_201_N1_GAITCYCLES'
         self.file3_rawdata = '/OA_302_P1_RAWDATA.csv'
         self.file3_fNIRS = '/OA_FNIRS_2019_WALK_306_oxydata.txt'
         ## Redefine "hardcode" file name
         self.trialFile = self.file_dict[participant][trial]
-        # self.df_file = '/OA_2019_302_NW1_Rep_1.2.csv'
-        # self.df_file1 = '/OA_2019_302_NW2_Rep_1.5.csv'
-        # self.df_file2 = '/OA_2019_302_P1_Rep_1.3.csv'
-        # self.df_file3 = '/OA_2019_302_P2_Rep_1.4.csv'
-        ## Dictionary structure to store processed data
-        self.cohort = {}
         ## Other variables initialization
         self.interval_index_span = 0.0
         self.lf_hf_store = []
@@ -87,26 +56,13 @@ class Processor:
     def process_data_file(self):
         # fs: sampling frequency
         # df: reading a csv file and store it in panads dataframe (http://pandas.pydata.org/pandas-docs/stable/)
-        # gdrive = True
         # loading and parsing data
         load_file =   load_data( self.trialFile , self.data_dir )
-        # df2 = load_data( self.df_file1 , self.data_dir)
-        # df3 = load_data( self.df_file2 , self.data_dir)
-        # df4 = load_data( self.df_file3 , self.data_dir)
         # data clean up and assignment
         self.file_data = delsys_cleanup(load_file)
-        # nw2 = delsys_cleanup(df2)
-        # p1 = delsys_cleanup(df3)
-        # p2 = delsys_cleanup(df4)
-        # delsys_cleanup?
         ## Other file processing
         self.matlabEMG = spio.loadmat('302_p1_EMG_datamatlab.mat', squeeze_me=True)
         self.treadmill_data = load_data(self.file3_rawdata, self.data_dir_treadmill)
-        # fNIRS = pd.read_csv(self.data_dir_fNIRS + self.file3_fNIRS,sep='\t')
-        ## Store data into dictionary
-        # n302 = {'p1':p1, 'p2':p2, 'nw1':nw1, 'nw2':nw2}
-        # self.cohort = {'302':n302}
-        # self.cohort['302']['p1'].fs = self.fs_ecg
         ## Array with interval information
         intervals = self.setInterval(30, 5, self.fs_ecg, self.file_data.shape[0])
         ## Extract different info such as lfhf and sdnn
@@ -214,7 +170,9 @@ class Processor:
     
     def getInterval(self):
         return self.intervals
-
+'''
+Preprocess data for participant 302
+'''
 def get302Data():
     data_dict = {'302': { 'p1':{} , 'p2':{} , 'nw1':{} , 'nw2':{} } }
     # Data for participant 302, trial p1 
@@ -251,14 +209,7 @@ Execute from here, for testing
 '''
 def main():
     processor = Processor('302','nw1')
-    # lfhf_list = processor.getLfhf()
-    # sdnn_list = processor.getSdnn()
-    # sd_fq_array = processor.get_sdnn_lfhf_array()
-    # theed_arr = processor.get3d()
-    # tm = processor.getThreadMData()
-    # print(lfhf_list)
-    # print(sdnn_list)
-    # print(tm)
+    
 
 if __name__=="__main__": 
     main()
