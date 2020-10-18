@@ -48,32 +48,39 @@ class Processor:
     ## Directory path
     data_dir_fNIRS = 'fNIRS'
     data_dir = 'csv'
+    file_dict = {'302':{'nw1':'/OA_2019_302_NW1_Rep_1.2.csv',
+                        'nw2':'/OA_2019_302_NW2_Rep_1.5.csv',
+                        'p1':'/OA_2019_302_P1_Rep_1.3.csv',
+                        'p2':'/OA_2019_302_P2_Rep_1.4.csv'}}
 
     '''
     Class constructor, can be extend by allowing parameter
     @ param file_name: String of the filename, for specific person one trial
     '''
-    def __init__(self, file_name):
+    def __init__(self, participant, trial):
         ## Existed string definition in Abdul file
         self.data_dir_treadmill = 'Treadmill data_trial1-4'
-        self.file3_clientinfo = 'OA_302_P1_CLIENTINFO'
-        self.file3_cueing = 'OA_302_N1_CUEING'
-        self.file3_gaitcycles = 'OA_201_N1_GAITCYCLES'
+        # self.file3_clientinfo = 'OA_302_P1_CLIENTINFO'
+        # self.file3_cueing = 'OA_302_N1_CUEING'
+        # self.file3_gaitcycles = 'OA_201_N1_GAITCYCLES'
         self.file3_rawdata = '/OA_302_P1_RAWDATA.csv'
         self.file3_fNIRS = '/OA_FNIRS_2019_WALK_306_oxydata.txt'
         ## Redefine "hardcode" file name
-        self.df_file = '/OA_2019_302_NW1_Rep_1.2.csv'
-        self.df_file1 = '/OA_2019_302_NW2_Rep_1.5.csv'
-        self.df_file2 = '/OA_2019_302_P1_Rep_1.3.csv'
-        self.df_file3 = '/OA_2019_302_P2_Rep_1.4.csv'
+        self.trialFile = self.file_dict[participant][trial]
+        # self.df_file = '/OA_2019_302_NW1_Rep_1.2.csv'
+        # self.df_file1 = '/OA_2019_302_NW2_Rep_1.5.csv'
+        # self.df_file2 = '/OA_2019_302_P1_Rep_1.3.csv'
+        # self.df_file3 = '/OA_2019_302_P2_Rep_1.4.csv'
         ## Dictionary structure to store processed data
         self.cohort = {}
         ## Other variables initialization
         self.interval_index_span = 0.0
         self.lf_hf_store = []
         self.sdnn_store = []
+        self.file_data = {}
         self.treadmill_data = {}
         self.matlabEMG = {}
+        self.intervals = []
         self.process_data_file()
         
 
@@ -82,33 +89,33 @@ class Processor:
         # df: reading a csv file and store it in panads dataframe (http://pandas.pydata.org/pandas-docs/stable/)
         # gdrive = True
         # loading and parsing data
-        df =   load_data( self.df_file , self.data_dir )
-        df2 = load_data( self.df_file1 , self.data_dir)
-        df3 = load_data( self.df_file2 , self.data_dir)
-        df4 = load_data( self.df_file3 , self.data_dir)
+        load_file =   load_data( self.trialFile , self.data_dir )
+        # df2 = load_data( self.df_file1 , self.data_dir)
+        # df3 = load_data( self.df_file2 , self.data_dir)
+        # df4 = load_data( self.df_file3 , self.data_dir)
         # data clean up and assignment
-        nw1 = delsys_cleanup(df)
-        nw2 = delsys_cleanup(df2)
-        p1 = delsys_cleanup(df3)
-        p2 = delsys_cleanup(df4)
+        self.file_data = delsys_cleanup(load_file)
+        # nw2 = delsys_cleanup(df2)
+        # p1 = delsys_cleanup(df3)
+        # p2 = delsys_cleanup(df4)
         # delsys_cleanup?
         ## Other file processing
         self.matlabEMG = spio.loadmat('302_p1_EMG_datamatlab.mat', squeeze_me=True)
         self.treadmill_data = load_data(self.file3_rawdata, self.data_dir_treadmill)
         # fNIRS = pd.read_csv(self.data_dir_fNIRS + self.file3_fNIRS,sep='\t')
         ## Store data into dictionary
-        n302 = {'p1':p1, 'p2':p2, 'nw1':nw1, 'nw2':nw2}
-        self.cohort = {'302':n302}
-        self.cohort['302']['p1'].fs = self.fs_ecg
+        # n302 = {'p1':p1, 'p2':p2, 'nw1':nw1, 'nw2':nw2}
+        # self.cohort = {'302':n302}
+        # self.cohort['302']['p1'].fs = self.fs_ecg
         ## Array with interval information
-        intervals = self.setInterval(30, 5, self.fs_ecg, self.cohort['302']['p1'].shape[0])
+        intervals = self.setInterval(30, 5, self.fs_ecg, self.file_data.shape[0])
         ## Extract different info such as lfhf and sdnn
         pack = []
         ecg_out = []
         RR_store = []
         for idx, val in enumerate(intervals[:-1]):
-            current_segment = self.cohort['302']['p1'][val[0]:val[1]].ecg
-            fs = self.cohort['302']['p1'].fs
+            current_segment = self.file_data[val[0]:val[1]].ecg
+            fs = self.fs_ecg
             BS_signal_analysis = ecg.ecg(signal=current_segment, sampling_rate=fs, show=False)
             RR = BS_signal_analysis['rpeaks']
             RR_store.append(RR)
@@ -128,11 +135,12 @@ class Processor:
         stride_length = np.int( stride * frequency)
         interval_length = np.int(interval_length * frequency)
         total_interval_over_strides = np.int(time_length // stride_length)
+        print(total_interval_over_strides)
         # Array with interval information
-        intervals = [None]*(total_interval_over_strides)
+        self.intervals = [None]*(total_interval_over_strides)
         for i in range(total_interval_over_strides):
-            intervals[i] = [i * stride_length, i * stride_length + interval_length]
-        return intervals     
+            self.intervals[i] = [i * stride_length, i * stride_length + interval_length]
+        return self.intervals     
         
     '''
     Extract Low frequency/ High frequency data from pack
@@ -203,13 +211,46 @@ class Processor:
     '''
     def getEMG(self):
         return self.matlabEMG
+    
+    def getInterval(self):
+        return self.intervals
 
-
+def get302Data():
+    data_dict = {'302': { 'p1':{} , 'p2':{} , 'nw1':{} , 'nw2':{} } }
+    # Data for participant 302, trial p1 
+    p1Data = Processor('302','p1')
+    data_dict['302']['p1']['data'] = p1Data
+    data_dict['302']['p1']['lfhf'] = p1Data.getLfhf()
+    data_dict['302']['p1']['sdnn'] = p1Data.getSdnn()
+    data_dict['302']['p1']['sd_lf'] = p1Data.get_sdnn_lfhf_array()
+    print("Finish getting data for: p1")
+    # Data for participant 302, trial p2
+    p2Data = Processor('302','p2')
+    data_dict['302']['p2']['data'] =  p2Data
+    data_dict['302']['p2']['lfhf'] =  p2Data.getLfhf()
+    data_dict['302']['p2']['sdnn'] =  p2Data.getSdnn()
+    data_dict['302']['p2']['sd_lf'] = p2Data.get_sdnn_lfhf_array()
+    print("Finish getting data for: p2")
+    # Data for participant 302, trial nw1
+    nw1Data = Processor('302','nw1')
+    data_dict['302']['nw1']['data'] =  nw1Data
+    data_dict['302']['nw1']['lfhf'] =  nw1Data.getLfhf()
+    data_dict['302']['nw1']['sdnn'] =  nw1Data.getSdnn()
+    data_dict['302']['nw1']['sd_lf'] = nw1Data.get_sdnn_lfhf_array()
+    print("Finish getting data for: nw1")
+    # Data for participant 302, trial nw2
+    nw2Data = Processor('302','nw2')
+    data_dict['302']['nw2']['data'] =  nw2Data
+    data_dict['302']['nw2']['lfhf'] =  nw2Data.getLfhf()
+    data_dict['302']['nw2']['sdnn'] =  nw2Data.getSdnn()
+    data_dict['302']['nw2']['sd_lf'] = nw2Data.get_sdnn_lfhf_array()
+    print("Finish getting data for: nw2")
+    return data_dict
 '''
 Execute from here, for testing
 '''
 def main():
-    processor = Processor()
+    processor = Processor('302','nw1')
     # lfhf_list = processor.getLfhf()
     # sdnn_list = processor.getSdnn()
     # sd_fq_array = processor.get_sdnn_lfhf_array()
