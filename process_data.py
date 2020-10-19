@@ -14,6 +14,7 @@ from biosppy.signals import ecg
 from utils import * #import data import, clean up and sampling functions. 
 import time 
 from ECG_feature_extractor_1000 import *
+import math
 
 class Processor:
     '''
@@ -105,6 +106,7 @@ class Processor:
         self.lf_hf_store = []
         for entry in pack:
             self.lf_hf_store.append(entry['lf_hf'])
+            # self.lf_hf_store.append(math.log(entry['lf_hf']))
         
     '''
     Extract sdnn data from RR_store, normalize SDNN data to avoid bias
@@ -115,6 +117,7 @@ class Processor:
             # ibi = np.diff(entry)
             sdnn = np.std(entry)
             self.sdnn_store.append(sdnn/400)
+            # self.sdnn_store.append(math.log(sdnn))
         
     '''
     Get LF/HF data for current file
@@ -151,6 +154,8 @@ class Processor:
         length = len(self.lf_hf_store)
         # Y = np.zeros(shape=(length,3))
         for i in range( length ):
+            if i > 35:
+                break
             dict_[(self.sdnn_store[i], self.lf_hf_store[i])] = i
             
         return dict_
@@ -181,6 +186,7 @@ def get302Data():
     data_dict['302']['p1']['lfhf'] = p1Data.getLfhf()
     data_dict['302']['p1']['sdnn'] = p1Data.getSdnn()
     data_dict['302']['p1']['sd_lf'] = p1Data.get_sdnn_lfhf_array()
+    data_dict['302']['p1']['3d_dict'] = p1Data.get3d()
     print("Finish getting data for: p1")
     # Data for participant 302, trial p2
     p2Data = Processor('302','p2')
@@ -188,6 +194,7 @@ def get302Data():
     data_dict['302']['p2']['lfhf'] =  p2Data.getLfhf()
     data_dict['302']['p2']['sdnn'] =  p2Data.getSdnn()
     data_dict['302']['p2']['sd_lf'] = p2Data.get_sdnn_lfhf_array()
+    data_dict['302']['p2']['3d_dict'] = p2Data.get3d()
     print("Finish getting data for: p2")
     # Data for participant 302, trial nw1
     nw1Data = Processor('302','nw1')
@@ -195,6 +202,7 @@ def get302Data():
     data_dict['302']['nw1']['lfhf'] =  nw1Data.getLfhf()
     data_dict['302']['nw1']['sdnn'] =  nw1Data.getSdnn()
     data_dict['302']['nw1']['sd_lf'] = nw1Data.get_sdnn_lfhf_array()
+    data_dict['302']['nw1']['3d_dict'] = nw1Data.get3d()
     print("Finish getting data for: nw1")
     # Data for participant 302, trial nw2
     nw2Data = Processor('302','nw2')
@@ -202,13 +210,38 @@ def get302Data():
     data_dict['302']['nw2']['lfhf'] =  nw2Data.getLfhf()
     data_dict['302']['nw2']['sdnn'] =  nw2Data.getSdnn()
     data_dict['302']['nw2']['sd_lf'] = nw2Data.get_sdnn_lfhf_array()
+    data_dict['302']['nw2']['3d_dict'] = nw2Data.get3d()
     print("Finish getting data for: nw2")
     return data_dict
+
+def getCumulate():
+    cumu_dict = {}
+    data_dict = get302Data()
+    cumu_dict['lfhf'] =       data_dict['302']['p1']['lfhf'] 
+    cumu_dict['lfhf'] = np.append( cumu_dict['lfhf'], data_dict['302']['p2']['lfhf'] ) 
+    cumu_dict['lfhf'] = np.append( cumu_dict['lfhf'], data_dict['302']['nw1']['lfhf'][0:35] )
+    cumu_dict['lfhf'] = np.append( cumu_dict['lfhf'], data_dict['302']['nw2']['lfhf'] )
+    cumu_dict['sdnn'] =       data_dict['302']['p1']['sdnn'] 
+    cumu_dict['sdnn'] = np.append( cumu_dict['sdnn'],data_dict['302']['p2']['sdnn'] )
+    cumu_dict['sdnn'] = np.append( cumu_dict['sdnn'],data_dict['302']['nw1']['sdnn'][0:35] )
+    cumu_dict['sdnn'] = np.append( cumu_dict['sdnn'],data_dict['302']['nw2']['sdnn'] )
+    cumu_dict['sd_lf'] =       data_dict['302']['p1']['sd_lf'] 
+    cumu_dict['sd_lf'] = np.vstack( (cumu_dict['sd_lf'], data_dict['302']['p2']['sd_lf']) )
+    cumu_dict['sd_lf'] = np.vstack( (cumu_dict['sd_lf'], data_dict['302']['nw1']['sd_lf'][0:35]) )
+    cumu_dict['sd_lf'] = np.vstack( (cumu_dict['sd_lf'], data_dict['302']['nw2']['sd_lf']) )
+    cumu_dict['3d_dict'] =       data_dict['302']['p1']['3d_dict'] 
+    cumu_dict['3d_dict'].update( data_dict['302']['p2']['3d_dict'] )
+    cumu_dict['3d_dict'].update(data_dict['302']['nw1']['3d_dict'] )
+    cumu_dict['3d_dict'].update(data_dict['302']['nw2']['3d_dict'] )
+    return cumu_dict
+
+
 '''
 Execute from here, for testing
 '''
 def main():
-    processor = Processor('302','nw1')
+    getCumulate()
+    # processor = Processor('302','nw1')
     
 
 if __name__=="__main__": 
