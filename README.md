@@ -82,5 +82,7 @@
 <!-- USAGE EXAMPLES -->
 ## Usage
 - If you want to cluster all four trials, open `Cumulate_data.ipynb`
+![](./view/allTrials.png)
 
-- Otherwise, you want to cluster individual trials, open `KMean_Lab_Data.ipynb`. You can sepcify which trial to cluster.
+- Otherwise, you want to cluster individual trials, open `KMean_Lab_Data.ipynb`. You can sepcify which trial to cluster in the second block.
+![](./view/individual.png)
