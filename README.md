@@ -44,7 +44,7 @@
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/github_username/repo_name.git
+   git clone https://github.com/TongyunHuang/HDCL.git
    ```
 2. Due to github memory limit, I am not able to upload csv files, please add csv file under directory `/csv`. More information about Project Structure
     - Now support file `OA_2019_302_NW1_Rep_1.2.csv`, `OA_2019_302_NW2_Rep_1.5.csv`,
@@ -56,8 +56,16 @@
 .
 ├── 302_p1_EMG_datamatlab.mat
 ├── README.md                   <-- This file
-├── Treadmill\ data_trial1-4
-├── csv                         <-- Put your csv file here
+├── Treadmill\ data_trial1-4    <-- Put Treadmill data here
+│   ├── OA_302_TM_N1.csv        <-- *Please add this manually*
+│   ├── OA_302_TM_N2.csv        <-- *Please add this manually*
+│   ├── OA_302_TM_P1.csv        <-- *Please add this manually*
+│   └── OA_302_TM_P2.csv        <-- *Please add this manually*
+├── csv                         <-- Put csv file here
+│   ├── OA_2019_302_NW1_Rep_1.2.csv   <-- *Please add this manually*
+│   ├── OA_2019_302_NW2_Rep_1.5.csv   <-- *Please add this manually*
+│   ├── OA_2019_302_P1_Rep_1.3.csv    <-- *Please add this manually*
+│   ├── OA_2019_302_P2_Rep_1.4.csv    <-- *Please add this manually*
 ├── fNIRS
 │   └── OA_FNIRS_2019_WALK_306_oxydata.txt
 ├── model                       <-- Most codes here
@@ -73,3 +81,6 @@
 
 <!-- USAGE EXAMPLES -->
 ## Usage
+- If you want to cluster all four trials, open `Cumulate_data.ipynb`
+
+- Otherwise, you want to cluster individual trials, open `KMean_Lab_Data.ipynb`. You can sepcify which trial to cluster.
