@@ -46,7 +46,7 @@
    ```sh
    git clone https://github.com/TongyunHuang/HDCL.git
    ```
-2. Due to github memory limit, I am not able to upload csv files, please add csv file under directory `/csv`. More information about Project Structure
+2. Due to github memory limit, I am not able to upload csv files, please add EKG data file under directory `/csv`. TreadMill data file under `Treadmill\ data_trial1-4`. You can download these data file in Abdul's google Drive. Under `anxiety_detection/tongyun/csv` and `anxiety_detection/tongyun/Treadmill\ data_trial1-4`. More information in Project Structure  <a href="#about-the-project">About The Project</a>
     - Now support file `OA_2019_302_NW1_Rep_1.2.csv`, `OA_2019_302_NW2_Rep_1.5.csv`,
     `OA_2019_302_P1_Rep_1.3.csv`, 
     `OA_2019_302_P2_Rep_1.4.csv`
