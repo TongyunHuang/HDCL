@@ -1,5 +1,4 @@
 # HDCL
-
 <!-- TABLE OF CONTENTS -->
 <details open="open">
   <summary><h2 style="display: inline-block">Table of Contents</h2></summary>
@@ -27,20 +26,14 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 - The ultimate goal of this project is to identify minimal sensor suite for anxiety detection
-- 
-
-
+- Use K-means clustering to label data
 
 ### Built With
 * Python
 * Jupyter Notebook
 
-
-
 <!-- GETTING STARTED -->
 ## Getting Started
-
-To get a local copy up and running follow these simple steps.
 
 ### Prerequisites
 
